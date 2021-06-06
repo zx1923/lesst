@@ -11,12 +11,12 @@ const cmdbody = cmdline('node', ['examples/cmdline/ask.js']);
 module.exports = () => {
   return section(sectionInfo, function (testflow) {
 
-    testflow.test('test input name as Sean', cmdbody, async cmdline => {
+    testflow.test('It should return Sean if input Sean', cmdbody, async cmdline => {
       const inpName = 'Sean';
       //
       (await cmdline.begin().waitForData()).assert(
         out => {
-          expect(out).to.include('name');
+          expect(out).to.include('What`s your name ?');
         }
       );
       // 
@@ -27,12 +27,12 @@ module.exports = () => {
       );
     });
     
-    testflow.test('test input name as Nancy', cmdbody, async cmdline => {
+    testflow.test('It should return Nancy if input Nancy', cmdbody, async cmdline => {
       const inpName = 'Nancy';
       //
       (await cmdline.begin().waitForData()).assert(
         out => {
-          expect(out).to.include('name');
+          expect(out).to.include('What`s your name ?');
         }
       );
       // 

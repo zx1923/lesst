@@ -193,6 +193,11 @@ Cmder.prototype.writeKey = function (key) {
   return this;
 };
 
+/**
+ * 模拟用户输入回车键
+ * 
+ * @returns 
+ */
 Cmder.prototype.enter = function () {
   stdinWrite(this.execInstance.stdin, '\n');
   return this;
@@ -207,7 +212,9 @@ Cmder.prototype.close = function () {
       this.execInstance.kill();
     }
   }
-  catch (err) {}
+  catch (err) {
+    printer.red(`Child process termination failed:`, err.message.trim());
+  }
 }
 
 module.exports = Cmder;

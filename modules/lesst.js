@@ -2,6 +2,7 @@ const TestFlow = require('./testflow');
 const emoji = require('node-emoji');
 const chai = require('chai');
 const printer = require('../utils/printer');
+const Cmder = require('./cmder');
 
 /**
  * 特殊按键定义
@@ -56,6 +57,8 @@ function cmdline(cmd, args = [], opts = {}) {
 }
 
 module.exports = {
+  TestFlow,
+  Cmder,
   section,
   cmdline,
   KeyBoard,
