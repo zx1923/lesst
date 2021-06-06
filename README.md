@@ -17,8 +17,6 @@ npm run demo
 
 ### 示例图
 
-![](./images/t-done-1.png)
-
 ![](./images/t-done-2.png)
 
 ![](./images/t-done-3.png)
