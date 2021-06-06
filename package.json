@@ -1,0 +1,22 @@
+{
+  "name": "cmd-tester",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "demo": "node examples/index.js"
+  },
+  "author": "Sean",
+  "license": "ISC",
+  "dependencies": {
+    "chai": "^4.3.4",
+    "chalk": "^4.1.1",
+    "node-emoji": "^1.10.0"
+  },
+  "devDependencies": {
+    "inquirer": "^8.1.0"
+  }
+}
