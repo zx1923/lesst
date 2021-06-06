@@ -19,8 +19,6 @@ npm run demo
 
 ![](./images/t-done-2.png)
 
-![](./images/t-done-3.png)
-
 如果测试过程中断言失败，则会在当前 section 结束后统计错误：
 
 ![](./images/t-error-1.png)
