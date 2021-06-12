@@ -42,13 +42,15 @@ function testCli() {
         }
       );
       //
-      (await cmdline.keep().writeKey(KeyBoard.Down).enter().wait(WaitTime)).assert(
+      await cmdline.keep().writeKey(KeyBoard.Down).wait(WaitTime);
+      (await cmdline.keep().enter().wait(WaitTime)).assert(
         out => {
           expect(out).to.include('请选择平台类型? sass');
         }
       );
       //
-      (await cmdline.keep().writeKey(KeyBoard.Down).enter().wait(WaitTime)).assert(
+      await cmdline.keep().writeKey(KeyBoard.Down).wait(WaitTime);
+      (await cmdline.keep().enter().wait(WaitTime)).assert(
         out => {
           expect(out).to.include('请选择您包含的虚拟机数量? 200').include(`{"plattype":"sass","vmCounts":"200"}`);
         }

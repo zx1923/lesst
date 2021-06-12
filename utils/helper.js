@@ -67,6 +67,13 @@ function delay(ms = 0) {
   });
 }
 
+/**
+ * 基于模板自服务构建循环字符串
+ * 
+ * @param {string} char 模板字符
+ * @param {number} times 次数
+ * @returns 
+ */
 function strRepeat(char = '', times = 1) {
   let res = '';
   while(times--) {
@@ -75,6 +82,13 @@ function strRepeat(char = '', times = 1) {
   return res;
 }
 
+/**
+ * 将命令和参数组装成命令字符串
+ * 
+ * @param {string} cmd 命令
+ * @param {array} args 参数
+ * @returns 
+ */
 function cmdStringify(cmd, args = []) {
   if (!args.length) {
     return cmd;

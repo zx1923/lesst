@@ -7,8 +7,6 @@ STRING_USE.forEach(el => {
   }
 });
 
-// chalk.bgYellow
-
 const LOG_MAP = {
   log: 'white',
   cyan: 'cyan',
@@ -18,48 +16,69 @@ const LOG_MAP = {
   green: 'green',
 };
 
-function Priner(tag) {
-  this.tag = tag;
+/**
+ * 打印字符串消息
+ * 
+ * @param {string} type 类型
+ * @param  {...any} msgs 消息
+ */
+function printByType(type, ...msgs) {
+  const color = LOG_MAP[type];
+  const msglog = msgs.map(el => {
+    return chalk[color](el);
+  });
+  console.log(...msglog);
+}
 
-  this._print = function (type, ...msgs) {
-    const color = LOG_MAP[type];
-    msgs.forEach((el, index) => {
-      msgs[index] = chalk[color](el);
-    });
-    console.log(...msgs);
+/**
+ * 处理控制台打印
+ */
+class Printer {
+  constructor (tag) {
+    this.tag = tag;
+  }
+
+  ln() {
+    console.log();
+  }
+  
+  info(...msgs) {
+    printByType('cyan', ...msgs);
+  }
+  
+  error(...msgs) {
+    printByType('red', ...msgs);
+  }
+  
+  warn(...msgs) {
+    printByType('yellow', ...msgs);
+  }
+  
+  label(...msgs) {
+    return this.warn(...msgs);
+  }
+  
+  success(...msgs) {
+    printByType('green', ...msgs);
   }
 }
 
-Priner.prototype.ln = function() {
-  console.log();
+class PrinterAdapter {
+  constructor(tag, stdout = true) {
+    if (stdout) {
+      const instance = new Printer(tag);
+      return instance;
+    }
+    
+    const instance = {};
+    ['ln', 'info', 'error', 'warn', 'label', 'success'].forEach(fn => {
+      instance[fn] = () => {};
+    });
+    return instance;
+  }
 }
 
-Priner.prototype.print = console.log;
-
-Priner.prototype.log = function (...msgs) {
-  this._print('log', ...msgs);
-}
-
-Priner.prototype.cyan = function (...msgs) {
-  this._print('cyan', ...msgs);
-}
-
-Priner.prototype.red = function (...msgs) {
-  this._print('red', ...msgs);
-}
-
-Priner.prototype.yellow = function (...msgs) {
-  this._print('yellow', ...msgs);
-}
-
-Priner.prototype.blue = function (...msgs) {
-  this._print('blue', ...msgs);
-}
-
-Priner.prototype.green = function (...msgs) {
-  this._print('green', ...msgs);
-}
-
-const printer = new Priner();
-
-module.exports = printer;
+module.exports = {
+  Printer,
+  PrinterAdapter,
+};
