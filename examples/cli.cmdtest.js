@@ -43,15 +43,15 @@ function testCli() {
         }
       );
       //
-      await cmdline.keep().writeKey(KeyBoard.Down).wait(WaitTime);
-      (await cmdline.keep().enter().wait(WaitTime)).assert(
+      await cmdline.clear().writeKey(KeyBoard.Down).wait(WaitTime);
+      (await cmdline.clear().enter().wait(WaitTime)).assert(
         out => {
           expect(out).to.include('请选择平台类型? sass');
         }
       );
       //
-      await cmdline.keep().writeKey(KeyBoard.Down).wait(WaitTime);
-      (await cmdline.keep().enter().wait(WaitTime)).assert(
+      await cmdline.clear().writeKey(KeyBoard.Down).wait(WaitTime);
+      (await cmdline.clear().enter().wait(WaitTime)).assert(
         out => {
           expect(out).to.include('请选择您包含的虚拟机数量? 200').include(`{"plattype":"sass","vmCounts":"200"}`);
         }
@@ -70,13 +70,13 @@ function testCli() {
         }
       );
       //
-      (await cmdline.keep().writeIn(tUname).wait(WaitTime)).assert(
+      (await cmdline.clear().writeIn(tUname).wait(WaitTime)).assert(
         out => {
           expect(out).to.include('请输入用户密码');
         }
       );
       //
-      (await cmdline.keep().writeIn(tUpass).wait(WaitTime)).assert(
+      (await cmdline.clear().writeIn(tUpass).wait(WaitTime)).assert(
         out => {
           expect(out).to.include('您登陆的账户信息如下').include(`{"username":"${tUname}","password":"${tUpass}"}`);
         }

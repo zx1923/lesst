@@ -116,7 +116,7 @@ class Cmder {
   /**
    * 保持当前状态，in/out 清零
    */
-  keep(): Cmder {
+  clear(): Cmder {
     this.chunkOut = '';
     this.chunkIn = '';
     this.chunkErr = '';
