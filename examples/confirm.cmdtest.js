@@ -22,7 +22,7 @@ module.exports = () => {
         }
       );
       // 
-      (await cmdline.clear().writeIn(inp).waitFor('Yes')).assert(
+      (await cmdline.clear().writeLine(inp).waitFor('Yes')).assert(
         out => {
           expect(out).to.include(`? Are you handsome? Yes`);
         }

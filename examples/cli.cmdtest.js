@@ -70,13 +70,13 @@ function testCli() {
         }
       );
       //
-      (await cmdline.clear().writeIn(tUname).wait(WaitTime)).assert(
+      (await cmdline.clear().writeLine(tUname).wait(WaitTime)).assert(
         out => {
           expect(out).to.include('请输入用户密码');
         }
       );
       //
-      (await cmdline.clear().writeIn(tUpass).wait(WaitTime)).assert(
+      (await cmdline.clear().writeLine(tUpass).wait(WaitTime)).assert(
         out => {
           expect(out).to.include('您登陆的账户信息如下').include(`{"username":"${tUname}","password":"${tUpass}"}`);
         }

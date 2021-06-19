@@ -237,12 +237,12 @@ class Cmder {
   };
 
   /**
-   * 向 child 进程的 stdin 写入数据
+   * 向 child 进程的 stdin 写入一行数据
    * 
    * @param data 写入的数据
    * @returns 
    */
-  writeIn(data: string): Cmder {
+   writeLine(data: string): Cmder {
     this.chunkIn = data;
     const input = `${this.chunkIn}\n`;
     if (this.execInstance.stdin.writable) {
