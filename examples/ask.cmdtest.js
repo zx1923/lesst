@@ -1,4 +1,4 @@
-const { expect, section, cmdline, KeyBoard } = require('../modules/lesst');
+const { expect, section, cmdline } = require('../dist');
 
 const sectionInfo = {
   title: '[Testing] examples/cmdline/ask.js',

@@ -1,4 +1,4 @@
-const { expect, section, cmdline, KeyBoard } = require('../modules/lesst');
+const { expect, section, cmdline } = require('../dist');
 
 const WaitTime = 1000;
 const sectionInfo = {

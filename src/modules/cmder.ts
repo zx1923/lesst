@@ -1,17 +1,33 @@
+import { Printer, createPrinterAdapter } from "../utils/printer";
+import helper from "../utils/helper";
+
 const { spawn } = require('child_process');
-const helper = require('../utils/helper');
-const { Printer, PrinterAdapter } = require('../utils/printer');
 
 const printer = new Printer('Cmder');
 process.stdin.setEncoding('utf8');
 
+interface CmderOptions {
+  stdout: boolean,
+  stderr: boolean
+}
+
+interface ExecInstance {
+  stdout: NodeJS.ReadWriteStream,
+  stdin: NodeJS.ReadWriteStream,
+  stderr: NodeJS.ReadWriteStream,
+  kill(): void
+};
+
+declare function AssertCallback(stdout: string, stderr: string): void;
+declare function WaitTargerFun(stdout: string, stderr: string): boolean;
+
 /**
  * 创建控制台打印输出实例
  * 
- * @param {boolean} show 是否显示输出
- * @param {string} data 显示的数据
+ * @param show 是否显示输出
+ * @param data 显示的数据
  */
-function createProcessOutInstance(show) {
+function createProcessOutInstance(show: boolean): Function {
   if (show) {
     return data => {
       if (process.stdout.writable) {
@@ -35,16 +51,29 @@ function stdinWrite(stdobj, data) {
 }
 
 class Cmder {
-  constructor(cmd = '', args = [], options = { stdout: true }) {
+  cmd: string
+  args: Array<string>
+  options: CmderOptions
+  execInstance: ExecInstance
+  chunkOut: string
+  chunkIn: string
+  chunkErr: string
+  failedNotes: Array<tFailedInfo>
+  processOut: Function
+  printerInstance: Printer
+  _prelk: string
+
+  constructor(cmd = '', args = [], options: CmderOptions) {
     this.cmd = cmd;
     this.args = args
     this.options = options;
     this.execInstance = null;
     this.chunkOut = '';
     this.chunkIn = '';
+    this.chunkErr = '';
     this.failedNotes = [];
     this.processOut = createProcessOutInstance(options && options.stdout);
-    this.printerInstance = new PrinterAdapter('Cmder', options && options.stdout);
+    this.printerInstance = createPrinterAdapter('Cmder', options && options.stdout);
     this._prelk = `PS ${process.cwd()}> `;
   }
 
@@ -53,7 +82,7 @@ class Cmder {
    * 
    * @returns 
    */
-  begin() {
+  begin(): Cmder {
     if (!this.execInstance) {
       const opts = {
         shell: true,
@@ -81,7 +110,7 @@ class Cmder {
   /**
    * 保持当前状态，in/out 清零
    */
-  keep() {
+  keep(): Cmder {
     this.chunkOut = '';
     this.chunkIn = '';
     return this;
@@ -93,12 +122,12 @@ class Cmder {
    * @param {function} fn 测试函数
    * @returns 
    */
-  assert(fn) {
+  assert(fn: typeof AssertCallback): Cmder {
     if (!helper.isFunction(fn)) {
       throw `Parameter 'fn' must be a function`.red();
     }
     try {
-      fn(this.chunkOut);
+      fn(this.chunkOut, this.chunkErr);
     }
     catch (err) {
       this.printerInstance.error(`Assertion detected an error: `, err.message.trim());
@@ -119,17 +148,17 @@ class Cmder {
    * 
    * @returns 
    */
-  getFailed() {
+  getFailed(): Array<tFailedInfo> {
     return this.failedNotes;
   };
 
   /**
    * 延时等待
    * 
-   * @param {number} ms 等待时间，毫秒
+   * @param ms 等待时间，毫秒
    * @returns 
    */
-  async wait(ms) {
+  async wait(ms: number = 3000): Promise<Cmder> {
     await helper.delay(ms);
     return this;
   };
@@ -137,10 +166,10 @@ class Cmder {
   /**
    * 等待直到有特征出现
    * 
-   * @param {Reg|Function} target 特征目标
-   * @param {number} timeout 超时时间，单位：毫秒
+   * @param target 特征目标
+   * @param timeout 超时时间，单位：毫秒
    */
-  async waitFor(target, timeout = 3000) {
+  async waitFor(target: RegExp | typeof WaitTargerFun, timeout: number = 3000) {
     // TODO: 
     // 如果 target 是正则，则使用 chunkout 的数据全局匹配
     // 如果 target 是 function ，则传入 chunkout 的数据由回调函数完成匹配
@@ -149,9 +178,9 @@ class Cmder {
   /**
    * 等待直到有数据回显
    * 
-   * @param {number} timeout 超时时间，单位：毫秒
+   * @param timeout 超时时间，单位：毫秒
    */
-  async waitForData(timeout = 3000) {
+  async waitForData(timeout: number = 3000): Promise<Cmder> {
     const start = Date.now();
     while (Date.now() - start < timeout) {
       if (!this.chunkOut) {
@@ -167,10 +196,10 @@ class Cmder {
   /**
    * 向 child 进程的 stdin 写入数据
    * 
-   * @param {string} data 写入的数据
+   * @param data 写入的数据
    * @returns 
    */
-  writeIn(data) {
+  writeIn(data: string): Cmder {
     this.chunkIn = data;
     const input = `${this.chunkIn}\n`;
     if (this.execInstance.stdin.writable) {
@@ -185,7 +214,7 @@ class Cmder {
    * 
    * @param {number} key 键盘输入
    */
-  writeKey(key) {
+  writeKey(key: Int8Array): Cmder {
     stdinWrite(this.execInstance.stdin, Buffer.from(key));
     return this;
   };
@@ -195,7 +224,7 @@ class Cmder {
    * 
    * @returns 
    */
-  enter() {
+  enter(): Cmder {
     stdinWrite(this.execInstance.stdin, '\n');
     return this;
   }
@@ -215,4 +244,4 @@ class Cmder {
   }
 };
 
-module.exports = Cmder;
+export default Cmder;

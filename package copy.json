@@ -1,17 +1,18 @@
 {
-  "name": "lesst",
+  "name": "cmd-tester",
   "version": "1.0.0",
-  "description": "A cmder line tester",
+  "description": "",
   "main": "index.js",
   "directories": {
-    "example": "examples",
-    "test": "tests"
+    "example": "examples"
   },
   "scripts": {
     "build": "gulp",
     "dev": "gulp dev",
     "demo": "node examples/index.js"
   },
+  "author": "Sean",
+  "license": "ISC",
   "dependencies": {
     "chalk": "^4.1.1",
     "node-emoji": "^1.10.0"
@@ -25,19 +26,5 @@
     "gulp-typescript": "^6.0.0-alpha.1",
     "gulp-uglify": "^3.0.2",
     "typescript": "^4.3.2"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/zx1923/lesst.git"
-  },
-  "keywords": [
-    "cmdline",
-    "tester"
-  ],
-  "author": "Sean",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/zx1923/lesst/issues"
-  },
-  "homepage": "https://github.com/zx1923/lesst#readme"
+  }
 }

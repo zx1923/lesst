@@ -1,10 +1,16 @@
-const TestFlow = require('./testflow');
+import TestFlow from "./testflow";
+import Cmder from "./cmder";
+import { Printer } from "../utils/printer";
 const emoji = require('node-emoji');
-const chai = require('chai');
-const { Printer } = require('../utils/printer');
-const Cmder = require('./cmder');
 
 const printer = new Printer('Lesst');
+
+interface SectionOtions {
+  title: string,
+  stdout: boolean,
+  stderr: boolean,
+  analysis: boolean
+}
 
 /**
  * 特殊按键定义
@@ -23,7 +29,7 @@ const KeyBoard = {
  * @param {function} fn 回调函数
  * @returns 
  */
-function section(opts = {}, fn) {
+function section(opts: SectionOtions, fn): Promise<void> {
   return new Promise(async resolve => {
     if (!opts || !opts.title) {
       printer.error(`Section test must have a title`);
@@ -58,15 +64,16 @@ function section(opts = {}, fn) {
  * @param {object} opts 启动属性
  * @returns 
  */
-function cmdline(cmd, args = [], opts = {}) {
+function cmdline(cmd: string, args: Array<string> = [], opts: any = {}) {
   return { cmd, args, opts };
 }
 
-module.exports = {
+export {
   TestFlow,
   Cmder,
   section,
   cmdline,
   KeyBoard,
-  ...chai,
 };
+
+export * from 'chai';

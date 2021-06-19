@@ -1,9 +1,35 @@
-const Cmder = require('./cmder');
-const helper = require('../utils/helper');
-const { Printer, PrinterAdapter } = require('../utils/printer');
+import Cmder from './cmder';
+import helper from "../utils/helper";
+import { Printer, createPrinterAdapter } from "../utils/printer";
 const emoji = require('node-emoji');
 
 const printer = new Printer('TestFlow');
+
+declare function tfItemCallback(cmdline: Cmder): Promise<void>;
+
+interface TFOptions {
+  stdout: boolean,
+  stderr?: boolean
+}
+
+interface iCmdBody {
+  cmd: string, 
+  args: Array<string>, 
+  opts: any
+}
+
+interface TFItem {
+  desc: string,
+  cmdbody: iCmdBody,
+  callback: typeof tfItemCallback
+}
+
+interface TFResults {
+  failed: Array<{
+    desc: string,
+    notes: Array<tFailedInfo>
+  }>
+}
 
 /**
  * 测试工作流
@@ -11,24 +37,29 @@ const printer = new Printer('TestFlow');
  * @param {object} opts 测试属性
  */
 class TestFlow {
-  constructor(opts = { stdout: true }) {
+  opts: TFOptions
+  flow: Array<TFItem>
+  results: TFResults
+  _print: Printer
+
+  constructor(opts: TFOptions) {
     this.opts = opts;
     this.flow = [];
     this.results = {
       failed: []
     };
 
-    this._print = new PrinterAdapter('TestFlow', opts && opts.stdout);
+    this._print = createPrinterAdapter('TestFlow', opts && opts.stdout);
   }
 
   /**
    * 塞入测试
    * 
-   * @param {string} desc 测试项描述
-   * @param {object} cmdbody 测试命令
-   * @param {function} callback 测试方法
+   * @param desc 测试项描述
+   * @param cmdbody 测试命令
+   * @param callback 测试方法
    */
-  test(desc = '', cmdbody, callback) {
+  test(desc = '', cmdbody: iCmdBody, callback: typeof tfItemCallback) {
     if (!desc) {
       throw `The testing description cannot be empty`;
     }
@@ -102,4 +133,4 @@ class TestFlow {
   }
 };
 
-module.exports = TestFlow;
+export default TestFlow;
