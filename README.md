@@ -9,7 +9,13 @@
 npm i
 ```
 
-验证 demo
+编译：
+
+```shell
+npm run build
+```
+
+验证 demo ：
 
 ```shell
 npm run demo
