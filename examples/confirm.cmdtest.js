@@ -1,4 +1,5 @@
-const { expect, section, cmdline } = require('../dist');
+const { section, cmdline } = require('../dist');
+const { expect } = require('chai');
 
 const WaitTime = 1000;
 const sectionInfo = {
@@ -21,7 +22,7 @@ module.exports = () => {
         }
       );
       // 
-      (await cmdline.keep().writeIn(inp).wait(WaitTime)).assert(
+      (await cmdline.keep().writeIn(inp).waitFor('Yes')).assert(
         out => {
           expect(out).to.include(`? Are you handsome? Yes`);
         }

@@ -1,4 +1,5 @@
-const { expect, section, cmdline } = require('../dist');
+const { section, cmdline } = require('../dist');
+const { expect } = require('chai');
 
 const sectionInfo = {
   title: '[Testing] examples/cmdline/ask.js',
@@ -15,14 +16,16 @@ module.exports = () => {
       const inpName = 'Sean';
       //
       (await cmdline.begin().waitForData()).assert(
-        out => {
+        (out, err) => {
           expect(out).to.include('What`s your name ?');
+          expect(err).to.be.empty;
         }
       );
       // 
       (await cmdline.keep().writeIn(inpName).waitFor('name is')).assert(
-        out => {
+        (out, err) => {
           expect(out).to.include(`name is ${inpName}`);
+          expect(err).to.be.empty;
         }
       );
     });
@@ -31,8 +34,9 @@ module.exports = () => {
       const inpName = 'Nancy';
       //
       (await cmdline.begin().waitForData()).assert(
-        out => {
+        (out, err) => {
           expect(out).to.include('What`s your name ?');
+          expect(err).to.be.empty;
         }
       );
       // 

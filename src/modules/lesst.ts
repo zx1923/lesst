@@ -75,5 +75,3 @@ export {
   cmdline,
   KeyBoard,
 };
-
-export * from 'chai';

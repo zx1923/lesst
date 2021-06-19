@@ -19,7 +19,10 @@ interface ExecInstance {
 };
 
 enum CmdChanel { stdout, stderr };
-enum ChanelName { 'chunkOut', 'chunkErr' };
+enum ChanelName {
+  chunkOut = 'chunkOut',
+  chunkErr = 'chunkErr' 
+};
 
 declare function AssertCallback(stdout: string, stderr: string): void;
 declare function WaitTargerFun(stdout: string, stderr: string): boolean;
@@ -52,21 +55,6 @@ function stdinWrite(stdobj, data) {
     stdobj.write(data);
   }
 }
-
-/**
- * 映射 std 关系
- * 
- * @param chanel 通道
- * @returns 
- */
-// function chunkMap (chanel: CmdChanel) {
-//   if (chanel === CmdChanel.stdout) {
-//     return ChanelName.chunkOut;
-//   }
-//   if (chanel === CmdChanel.stderr) {
-//     return ChanelName.chunkErr;
-//   }
-// }
 
 class Cmder {
   cmd: string
@@ -118,11 +106,9 @@ class Cmder {
       this.processOut(chunk);
     });
   
-    this.execInstance.stderr.on('data', errdata => {
-      this.processOut(errdata.toString().red());
-      this.execInstance.stderr.on('end', () => {
-        process.exit(0);
-      });
+    this.execInstance.stderr.on('data', chunk => {
+      this.chunkErr += chunk;
+      this.processOut(chunk.toString().red());
     });
     return this;
   }
@@ -223,7 +209,7 @@ class Cmder {
     }
     const start = Date.now();
     while (Date.now() -  start < timeout) {
-      if (!await regsCallback(this.chunkOut)) {
+      if (!await regsCallback(this[this.chanelName])) {
         await helper.delay(100);
         continue;
       }

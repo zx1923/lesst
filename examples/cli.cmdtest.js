@@ -1,4 +1,5 @@
-const { expect, section, cmdline, KeyBoard } = require('../dist');
+const { section, cmdline, KeyBoard } = require('../dist');
+const { expect } = require('chai');
 
 const WaitTime = 1000;
 const sectionInfo = {
