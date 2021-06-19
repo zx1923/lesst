@@ -4,8 +4,8 @@ const cliCmdTest = require('./cli.cmdtest');
 
 async function run() {
   await askCmdTest();
-  await confirmCmdTest();
-  await cliCmdTest();
+  // await confirmCmdTest();
+  // await cliCmdTest();
 };
 
 run();

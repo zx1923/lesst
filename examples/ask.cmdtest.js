@@ -20,7 +20,7 @@ module.exports = () => {
         }
       );
       // 
-      (await cmdline.keep().writeIn(inpName).waitForData()).assert(
+      (await cmdline.keep().writeIn(inpName).waitFor('name is')).assert(
         out => {
           expect(out).to.include(`name is ${inpName}`);
         }
@@ -36,7 +36,7 @@ module.exports = () => {
         }
       );
       // 
-      (await cmdline.keep().writeIn(inpName).waitForData()).assert(
+      (await cmdline.keep().writeIn(inpName).waitFor('name is')).assert(
         out => {
           expect(out).to.include(`name is ${inpName}`);
         }

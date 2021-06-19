@@ -54,6 +54,25 @@ function isFunction(obj: any): boolean {
 }
 
 /**
+ * 是否为正则
+ * 
+ * @param obj 被检测对象
+ * @returns 
+ */
+function isRegExp(obj: any): boolean {
+  return _is(obj, 'RegExp');
+}
+
+/**
+ * 是否在字符串
+ * 
+ * @param obj 被检测对象
+ */
+function isString(obj: any): boolean {
+  return _is(obj, 'String');
+}
+
+/**
  * 延时等待
  * 
  * @param {number} ms 毫秒
@@ -107,6 +126,8 @@ export default {
   isObject,
   isArray,
   isFunction,
+  isRegExp,
+  isString,
   strRepeat,
   delay,
   cmdStringify,

@@ -18,6 +18,9 @@ interface ExecInstance {
   kill(): void
 };
 
+enum CmdChanel { stdout, stderr };
+enum ChanelName { 'chunkOut', 'chunkErr' };
+
 declare function AssertCallback(stdout: string, stderr: string): void;
 declare function WaitTargerFun(stdout: string, stderr: string): boolean;
 
@@ -50,6 +53,21 @@ function stdinWrite(stdobj, data) {
   }
 }
 
+/**
+ * 映射 std 关系
+ * 
+ * @param chanel 通道
+ * @returns 
+ */
+// function chunkMap (chanel: CmdChanel) {
+//   if (chanel === CmdChanel.stdout) {
+//     return ChanelName.chunkOut;
+//   }
+//   if (chanel === CmdChanel.stderr) {
+//     return ChanelName.chunkErr;
+//   }
+// }
+
 class Cmder {
   cmd: string
   args: Array<string>
@@ -61,6 +79,7 @@ class Cmder {
   failedNotes: Array<tFailedInfo>
   processOut: Function
   printerInstance: Printer
+  chanelName: ChanelName
   _prelk: string
 
   constructor(cmd = '', args = [], options: CmderOptions) {
@@ -71,6 +90,7 @@ class Cmder {
     this.chunkOut = '';
     this.chunkIn = '';
     this.chunkErr = '';
+    this.chanelName = ChanelName.chunkOut;
     this.failedNotes = [];
     this.processOut = createProcessOutInstance(options && options.stdout);
     this.printerInstance = createPrinterAdapter('Cmder', options && options.stdout);
@@ -113,6 +133,7 @@ class Cmder {
   keep(): Cmder {
     this.chunkOut = '';
     this.chunkIn = '';
+    this.chunkErr = '';
     return this;
   };
 
@@ -164,15 +185,51 @@ class Cmder {
   };
 
   /**
+   * 设置检测通道
+   * @param value 通道名
+   * @returns 
+   */
+  chanel(value: CmdChanel) {
+    if (value === CmdChanel.stdout) {
+      this.chanelName = ChanelName.chunkOut;
+    }
+    else if (value === CmdChanel.stderr) {
+      this.chanelName = ChanelName.chunkErr;
+    }
+    return this;
+  }
+
+  /**
    * 等待直到有特征出现
    * 
    * @param target 特征目标
    * @param timeout 超时时间，单位：毫秒
    */
-  async waitFor(target: RegExp | typeof WaitTargerFun, timeout: number = 3000) {
-    // TODO: 
-    // 如果 target 是正则，则使用 chunkout 的数据全局匹配
-    // 如果 target 是 function ，则传入 chunkout 的数据由回调函数完成匹配
+  async waitFor(target: any | RegExp | typeof WaitTargerFun, timeout: number = 3000) {
+    let regsCallback;
+    if (helper.isFunction(target)) {
+      regsCallback = target;
+    }
+    else if (target instanceof RegExp) {
+      regsCallback = (chunk: string) => {
+        return target.test(chunk);
+      }
+    }
+    else {
+      const comReg = new RegExp(target.toString());
+      regsCallback = (chunk: string) => {
+        return comReg.test(chunk);
+      }
+    }
+    const start = Date.now();
+    while (Date.now() -  start < timeout) {
+      if (!await regsCallback(this.chunkOut)) {
+        await helper.delay(100);
+        continue;
+      }
+      return this;
+    }
+    return this;
   };
 
   /**
