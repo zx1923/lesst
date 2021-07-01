@@ -9,52 +9,129 @@ declare function tfItemCallback(cmdline: Cmder): Promise<void>;
 
 interface TFOptions {
   stdout: boolean,
-  stderr?: boolean
+  stderr?: boolean,
 }
 
 interface iCmdBody {
   cmd: string, 
   args: Array<string>, 
-  opts: any
+  opts: any,
 }
 
 interface TFItem {
   desc: string,
   cmdbody: iCmdBody,
-  callback: typeof tfItemCallback
+  callback: typeof tfItemCallback,
 }
 
 interface TFResults {
   failed: Array<{
     desc: string,
-    notes: Array<tFailedInfo>
+    notes: Array<tFailedInfo>,
   }>
+}
+
+interface TFHooks {
+  beforeAllFn: Function,
+  afterAllFn: Function,
+  beforeEachFn: Function,
+  afterEachFn: Function,
+}
+
+/**
+ * 处理错误记录
+ * @param context TestFlow 实例
+ */
+function dealWidthErrorNotes(context: TestFlow, desc: string, errorNotes: Array<tFailedInfo>) {
+  if (!errorNotes.length) {
+    context._print.success(emoji.get('sunglasses'), `Done`);
+    return;
+  }
+
+  context.results.failed.push({
+    desc,
+    notes: errorNotes,
+  });
+  context._print.warn(emoji.get('unamused'), `Failed`);
 }
 
 /**
  * 测试工作流
- * 
  * @param {object} opts 测试属性
  */
 class TestFlow {
   opts: TFOptions
   flow: Array<TFItem>
   results: TFResults
+  hooks: TFHooks
   _print: Printer
 
   constructor(opts: TFOptions) {
     this.opts = opts;
     this.flow = [];
+    this.hooks = {
+      beforeAllFn() {},
+      afterAllFn() {},
+      beforeEachFn() {},
+      afterEachFn() {},
+    };
     this.results = {
-      failed: []
+      failed: [],
     };
 
     this._print = createPrinterAdapter('TestFlow', opts && opts.stdout);
   }
 
   /**
+   * 在所有测试前执行
+   * @param callback 回调函数
+   * @returns 
+   */
+  beforeAll(callback: Function): Promise<any> {
+    if (helper.isFunction(callback)) {
+      this.hooks.beforeAllFn = callback.bind(this);
+    }
+    return Promise.resolve();
+  }
+
+  /**
+   * 在每个测试执行前回调
+   * @param callback 回调函数
+   * @returns 
+   */
+  beforeEach(callback: Function): Promise<any> {
+    if (helper.isFunction(callback)) {
+      this.hooks.beforeEachFn = callback.bind(this);
+    }
+    return Promise.resolve();
+  }
+
+  /**
+   * 在所有测试结束后回调
+   * @param callback 回调函数
+   * @returns 
+   */
+  afterAll(callback: Function): Promise<any> {
+    if (helper.isFunction(callback)) {
+      this.hooks.afterAllFn = callback.bind(this);
+    }
+    return Promise.resolve();
+  }
+
+  /**
+   * 在每个测试执行前回调
+   * @param callback 回调函数
+   * @returns 
+   */
+  afterEach(callback: Function): Promise<any> {
+    if (helper.isFunction(callback)) {
+      this.hooks.afterEachFn = callback.bind(this);
+    }
+    return Promise.resolve();
+  }
+
+  /**
    * 塞入测试
-   * 
    * @param desc 测试项描述
    * @param cmdbody 测试命令
    * @param callback 测试方法
@@ -75,31 +152,37 @@ class TestFlow {
    * 启动命令测试
    */
   async start() {
+    // beforeAll hooks
+    this.hooks.beforeAllFn();
+
     for (let i = 0, len = this.flow.length; i < len; i++) {
       const { desc, cmdbody, callback } = this.flow[i];
       cmdbody.opts.stdout = this.opts && this.opts.stdout;
       const cmder = new Cmder(cmdbody.cmd, cmdbody.args, cmdbody.opts);
       this._print.label(emoji.get('label'), `[Test.${i + 1}]`, `${desc}`.bold());
       this._print.info(helper.strRepeat('-', 40));
+
+      // beforeEach hooks 
+      this.hooks.beforeEachFn();
+
+      // test function
       await callback(cmder).catch(err => {
         printer.error(err);
         process.exit(0);
       });
       cmder.close();
 
+      // deal width error notes
       const errorNotes = cmder.getFailed();
-      if (errorNotes.length) {
-        this.results.failed.push({
-          desc,
-          notes: errorNotes
-        });
-        this._print.warn(emoji.get('unamused'), `Failed`);
-      }
-      else {
-        this._print.success(emoji.get('sunglasses'), `Done`);
-      }
+      dealWidthErrorNotes(this, desc, errorNotes);
+
+      // afterEach hooks 
+      this.hooks.beforeEachFn();
       this._print.info(`${helper.strRepeat('-', 40)}\n`);
     }
+
+    // afterAll hooks
+    this.hooks.afterAllFn();
   }
 
   /**
