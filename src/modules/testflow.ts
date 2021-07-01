@@ -147,7 +147,7 @@ class TestFlow {
    * @param cmdbody 测试命令
    * @param callback 测试方法
    */
-  feed(desc = '', cmdbody: iCmdBody, callback: typeof tfItemCallback) {
+  feed(desc: string = '', cmdbody: iCmdBody, callback: typeof tfItemCallback) {
     const testItem = this.test(desc, cmdbody, callback);
     this.flow.push(testItem);
   }
@@ -158,7 +158,7 @@ class TestFlow {
    * @param cmdbody 测试命令
    * @param callback 测试方法
    */
-   test(desc = '', cmdbody: iCmdBody, callback: typeof tfItemCallback): TFItem {
+   test(desc: string = '', cmdbody: iCmdBody, callback: typeof tfItemCallback): TFItem {
     if (!desc) {
       throw `The testing description cannot be empty`;
     }
