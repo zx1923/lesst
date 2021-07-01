@@ -33,9 +33,16 @@ interface TFResults {
 
 interface TFHooks {
   beforeAllFn: Function,
-  afterAllFn: Function,
   beforeEachFn: Function,
+  afterAllFn: Function,
   afterEachFn: Function,
+}
+
+enum TFHookName {
+  beforeAll = 'beforeAllFn',
+  beforeEach = 'beforeEachFn',
+  afterAll = 'afterAllFn',
+  afterEach = 'afterEachFn',
 }
 
 /**
@@ -71,8 +78,8 @@ class TestFlow {
     this.flow = [];
     this.hooks = {
       beforeAllFn() {},
-      afterAllFn() {},
       beforeEachFn() {},
+      afterAllFn() {},
       afterEachFn() {},
     };
     this.results = {
@@ -83,15 +90,28 @@ class TestFlow {
   }
 
   /**
+   * 设置钩子回调函数
+   * @param hookName 名
+   * @param callback 回调
+   * @returns 
+   */
+  setHooks(hookName: TFHookName, callback: Function) {
+    if (!helper.isFunction(callback)) {
+      return;
+    }
+    this.hooks[hookName] = async () => {
+      await callback.call(this);
+      return Promise.resolve();
+    }
+  }
+
+  /**
    * 在所有测试前执行
    * @param callback 回调函数
    * @returns 
    */
-  beforeAll(callback: Function): Promise<any> {
-    if (helper.isFunction(callback)) {
-      this.hooks.beforeAllFn = callback.bind(this);
-    }
-    return Promise.resolve();
+  beforeAll(callback: Function) {
+    this.setHooks(TFHookName.beforeAll, callback);
   }
 
   /**
@@ -99,11 +119,8 @@ class TestFlow {
    * @param callback 回调函数
    * @returns 
    */
-  beforeEach(callback: Function): Promise<any> {
-    if (helper.isFunction(callback)) {
-      this.hooks.beforeEachFn = callback.bind(this);
-    }
-    return Promise.resolve();
+  beforeEach(callback: Function) {
+    this.setHooks(TFHookName.beforeEach, callback);
   }
 
   /**
@@ -111,11 +128,8 @@ class TestFlow {
    * @param callback 回调函数
    * @returns 
    */
-  afterAll(callback: Function): Promise<any> {
-    if (helper.isFunction(callback)) {
-      this.hooks.afterAllFn = callback.bind(this);
-    }
-    return Promise.resolve();
+  afterAll(callback: Function) {
+    this.setHooks(TFHookName.afterAll, callback);
   }
 
   /**
@@ -123,11 +137,8 @@ class TestFlow {
    * @param callback 回调函数
    * @returns 
    */
-  afterEach(callback: Function): Promise<any> {
-    if (helper.isFunction(callback)) {
-      this.hooks.afterEachFn = callback.bind(this);
-    }
-    return Promise.resolve();
+  afterEach(callback: Function) {
+    this.setHooks(TFHookName.afterEach, callback);
   }
 
   /**
@@ -136,7 +147,18 @@ class TestFlow {
    * @param cmdbody 测试命令
    * @param callback 测试方法
    */
-  test(desc = '', cmdbody: iCmdBody, callback: typeof tfItemCallback) {
+  feed(desc = '', cmdbody: iCmdBody, callback: typeof tfItemCallback) {
+    const testItem = this.test(desc, cmdbody, callback);
+    this.flow.push(testItem);
+  }
+
+  /**
+   * 定义一个测试项
+   * @param desc 测试项描述
+   * @param cmdbody 测试命令
+   * @param callback 测试方法
+   */
+   test(desc = '', cmdbody: iCmdBody, callback: typeof tfItemCallback): TFItem {
     if (!desc) {
       throw `The testing description cannot be empty`;
     }
@@ -145,7 +167,17 @@ class TestFlow {
       throw `Parameter 'callback' must be a function`;
     }
 
-    this.flow.push({ desc, cmdbody, callback });
+    return { desc, cmdbody, callback };
+  }
+
+  /**
+   * 设置执行顺序
+   * @param tests 测试认为
+   */
+  series(tests: Array<TFItem> = []) {
+    tests.forEach(item => {
+      this.flow.push(item);
+    });
   }
 
   /**
@@ -153,7 +185,7 @@ class TestFlow {
    */
   async start() {
     // beforeAll hooks
-    this.hooks.beforeAllFn();
+    await this.hooks.beforeAllFn();
 
     for (let i = 0, len = this.flow.length; i < len; i++) {
       const { desc, cmdbody, callback } = this.flow[i];
@@ -163,7 +195,7 @@ class TestFlow {
       this._print.info(helper.strRepeat('-', 40));
 
       // beforeEach hooks 
-      this.hooks.beforeEachFn();
+      await this.hooks.beforeEachFn();
 
       // test function
       await callback(cmder).catch(err => {
@@ -177,12 +209,12 @@ class TestFlow {
       dealWidthErrorNotes(this, desc, errorNotes);
 
       // afterEach hooks 
-      this.hooks.beforeEachFn();
+      await this.hooks.afterEachFn();
       this._print.info(`${helper.strRepeat('-', 40)}\n`);
     }
 
     // afterAll hooks
-    this.hooks.afterAllFn();
+    await this.hooks.afterAllFn();
   }
 
   /**

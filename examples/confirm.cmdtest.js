@@ -13,7 +13,7 @@ const cmdbody = cmdline('node', ['examples/cmdline/confirm.js']);
 module.exports = () => {
   return section(sectionInfo, function (testflow) {
 
-    testflow.test('Confirm 输入 y 应该返回 Yes', cmdbody, async cmdline => {
+    testflow.feed('Confirm 输入 y 应该返回 Yes', cmdbody, async cmdline => {
       const inp = 'y';
       //
       (await cmdline.begin().wait(WaitTime)).assert(

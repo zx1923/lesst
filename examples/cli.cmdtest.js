@@ -12,8 +12,24 @@ function testCli() {
   let cmdbody = cmdline('test-cli', ['-h']);
   return section(sectionInfo, function (testflow) {
 
+    testflow.beforeAll(() => {
+      console.log('<<< Before all >>>');
+    });
+
+    testflow.afterAll(() => {
+      console.log('<<< After all >>>');
+    });
+
+    testflow.beforeEach(() => {
+      console.log('<<< Before Each >>>');
+    });
+
+    testflow.afterEach(() => {
+      console.log('<<< After Each >>>');
+    });
+
     // test-cli -h
-    testflow.test('执行 test-cli -h 应该返回帮助信息', cmdbody, async cmdline => {
+    testflow.feed('执行 test-cli -h 应该返回帮助信息', cmdbody, async cmdline => {
       //
       (await cmdline.begin().wait(500)).assert(
         out => {
@@ -24,7 +40,7 @@ function testCli() {
 
     // test-cli -V
     cmdbody = cmdline('test-cli', ['-V']);
-    testflow.test('执行 test-cli -V 应该返回版本号', cmdbody, async cmdline => {
+    testflow.feed('执行 test-cli -V 应该返回版本号', cmdbody, async cmdline => {
       //
       (await cmdline.begin().wait(500)).assert(
         out => {
@@ -35,7 +51,7 @@ function testCli() {
 
     // test-cli -i init
     cmdbody = cmdline('test-cli', ['-i', 'init']);
-    testflow.test('执行 test-cli -i init 应该返回平台信息', cmdbody, async cmdline => {
+    testflow.feed('执行 test-cli -i init 应该返回平台信息', cmdbody, async cmdline => {
       //
       (await cmdline.begin().wait(WaitTime)).assert(
         out => {
@@ -60,7 +76,7 @@ function testCli() {
 
     // test-cli -i login
     cmdbody = cmdline('test-cli', ['-i', 'login']);
-    testflow.test('执行 test-cli -i login 应该返回登录信息', cmdbody, async cmdline => {
+    testflow.feed('执行 test-cli -i login 应该返回登录信息', cmdbody, async cmdline => {
       const tUname = 'Sean';
       const tUpass = '123456';
       //
